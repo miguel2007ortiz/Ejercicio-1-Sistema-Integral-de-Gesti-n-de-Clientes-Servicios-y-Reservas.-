@@ -203,7 +203,7 @@ def registrar_cliente():# Registra un nuevo cliente solicitando datos por consol
 # Muestra la lista de clientes registrados; si no hay, informa que está vacía
 def listar_clientes():
     if not clientes:
-        print("⚠️ No hay clientes registrados")
+        print(" No hay clientes registrados")
         return
 # Recorre la lista de clientes asignando un número (desde 1) y muestra su informació
     for i, c in enumerate(clientes, 1):
@@ -251,7 +251,7 @@ def crear_reserva():
         
 def ver_reservas():#Define la función que sirve para mostrar todas las reservas registradas
     if not reservas: #Verifica si la lista reservas está vacía.
-        print("⚠️ No hay reservas registradas")
+        print(" No hay reservas registradas")
         return
     for i, r in enumerate(reservas, 1):#Recorre la lista reservas.
                                         #i = número de la reserva (empieza en 1)
@@ -261,7 +261,7 @@ def ver_reservas():#Define la función que sirve para mostrar todas las reservas
 
 def cancelar_reserva():#Define la función que sirve para cancelar una reserva existente.
     if not reservas:#Verifica si la lista reservas está vacía.
-        print("⚠️ No hay reservas para cancelar")
+        print(" No hay reservas para cancelar")
         return
 
     ver_reservas()#Llama a la función que muestra todas las reservas disponibles.
