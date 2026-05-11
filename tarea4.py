@@ -11,9 +11,6 @@ Un sistema robusto de gestión de reservas que demuestra:
 - Logging detallado
 - Validaciones robustas
 - Patrones de diseño (singledispatchmethod)
-
-Autores: Estudiante de Programación Universitaria
-Fecha: 2026
 """
 
 import logging
