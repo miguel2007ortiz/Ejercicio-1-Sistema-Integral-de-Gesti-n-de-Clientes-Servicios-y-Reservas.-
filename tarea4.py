@@ -11,9 +11,12 @@ Un sistema robusto de gestión de reservas que demuestra:
 - Logging detallado
 - Validaciones robustas
 - Patrones de diseño (singledispatchmethod)
+- Persistencia de datos en archivos JSON
 """
 
 import logging
+import json
+import os
 from abc import ABC, abstractmethod
 from functools import singledispatchmethod
 from typing import List, Optional, Tuple
@@ -221,7 +224,7 @@ class Reserva:
 
 #================================================================================================================================
 # BLOQUE DE FUNCIONES =================
-# se crean 2 listas vacias  y funciones
+# se crean las listas vacias  y se agregan funciones
 
 clientes = []
 servicios = []
@@ -230,7 +233,54 @@ reservas = []
 servicios.append(ReservaSala('Sala Premium', 50000))# Crea una instancia de ReservaSala y la agrega a la lista de servicios y se le da valor 
 servicios.append(AlquilerEquipo('Portátil Gamer', 40000))# crea instancia de class alquielerequipo y se de da valor 
 servicios.append(AsesoriaEspecializada('Consultoría TI', 90000))# se crea instancia class asesoriaespacializada y se da valor 
+# =====================================================================
+# SISTEMA DE PERSISTENCIA
+# =====================================================================
 
+def guardar_datos():
+    # Guarda la lista de clientes en un archivo json para no perder datos al cerrar
+    try:
+        lista_final = []
+        for c in clientes:
+            lista_final.append({
+                "nombre": c.nombre,
+                "cedula": c._Cliente__cedula,
+                "correo": c._Cliente__correo,
+                "telefono": c._Cliente__telefono
+            })
+        
+        with open('data_clientes.json', 'w', encoding='utf-8') as archivo:
+            json.dump(lista_final, archivo, indent=4, ensure_ascii=False)
+            
+        logging.info("Archivo data_clientes.json actualizado correctamente.")
+    except Exception as error:
+        logging.error(f"Error al guardar: {error}")
+def generar_reporte_txt(reserva):
+    # Genera un historial de reservas en un archivo de texto plano (Logs de usuario)
+    try:
+        with open('historial_reservas.txt', 'a', encoding='utf-8') as f:
+            f.write(f"RESERVA REALIZADA: {reserva.cliente.nombre} | "
+                    f"Servicio: {reserva.servicio.nombre} | "
+                    f"Horas: {reserva.horas} | "
+                    f"Costo calculado con éxito\n")
+            f.write("-" * 60 + "\n")
+        print("-> Reporte generado en historial_reservas.txt")
+    except Exception as e:
+        logging.error(f"Error al escribir reporte TXT: {e}")
+
+def cargar_datos():
+    # Carga la info desde el json apenas arranca el sistema
+    if os.path.exists('data_clientes.json'):
+        try:
+            with open('data_clientes.json', 'r', encoding='utf-8') as archivo:
+                datos_leidos = json.load(archivo)
+                for d in datos_leidos:
+                    clientes.append(Cliente(d['nombre'], d['cedula'], d['correo'], d['telefono']))
+            print("-> Info: Se recuperaron los clientes del archivo local.")
+        except Exception as error:
+            logging.error(f"Error al cargar: {error}")
+
+# =====================================================================
 
 def registrar_cliente():# Registra un nuevo cliente solicitando datos por consola,
 # valida la información mediante la clase Cliente y lo agrega a la lista.
@@ -243,6 +293,7 @@ def registrar_cliente():# Registra un nuevo cliente solicitando datos por consol
 
         cli = Cliente(n, c, co, t) # Crea un objeto Cliente con los datos ingresados
         clientes.append(cli)  # Agrega el cliente a la lista de clientes
+        guardar_datos() 
 
         print('Cliente registrado')
 
@@ -289,6 +340,7 @@ def crear_reserva():
         if confirmar == 'si':#Si el usuario digita “si”, continúa con la confirmación
             total = r.procesar()#calcula costo valida estadoconfirma la reserva
             reservas.append(r) #Guarda la reserva en la lista reservas
+            generar_reporte_txt(r) #Genera el TXT físico
             print('Reserva creada. Total:', total)# Muestra el valor total de la reserva
         else:
             print("Reserva no confirmada")#Si el usuario no confirma, no se guarda la reserva
@@ -349,11 +401,14 @@ def pruebas_automaticas():# función que ejecuta pruebas del sistema automática
         Reserva(clientes[0], servicios[1], -1)#Intenta crear una reserva inválida, debe fallar al se -1 
     except Exception as e:
         logging.error(e)#Captura el error y lo guarda en el log.
+    guardar_datos()
 
     print('Pruebas ejecutadas')
+    
 
 
 def menu():# función principal del programa, que muestra el menú de opciones.
+    cargar_datos() # Carga automática al abrir
     while True:#Crea un ciclo infinito.
                 #El menú se repite una y otra vez hasta que el usuario elija salir.
         try:#Intenta ejecutar todo el menú sin que el programa se caiga si hay errores.
